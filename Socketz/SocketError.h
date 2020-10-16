@@ -10,6 +10,7 @@ private:
 
 public:
     SocketError(const std::string& message);
+    SocketError(const char* message);
     std::string getMessage() const;
 
 };

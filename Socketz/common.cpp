@@ -72,14 +72,14 @@ std::string SocketzInternals::ipv4AddressToString(const in_addr* addr) {
 
     if(WSAAddressToString((struct sockaddr *)&ss, sizeof(ss), NULL, buf, &s) == 0) {
         //There was an error
-        return "unknown";
+        return string("unknown");
     }
 
     #else
 
     if(inet_ntop(AF_INET, addr, buf, sizeof(buf)) == 0) {
         //There was an error
-        return "unknown";
+        return string("unknown");
     }
 
     #endif
@@ -111,6 +111,7 @@ std::string SocketzInternals::ipv6AddressToString(const in6_addr* addr) {
     }
 
     #endif
+
 
     return string(buf);
 }

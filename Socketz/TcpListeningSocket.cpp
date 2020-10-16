@@ -65,7 +65,7 @@ bool TcpListeningSocket::listenTo(const uint16_t port, const uint16_t backlog){
 		myAddr.sin_addr.s_addr = INADDR_ANY;
 		myAddr.sin_port = htons(port);
 		if(bind(sockfd, (struct sockaddr*) &myAddr, sizeof(myAddr)) < 0) {
-			throw SocketError("TcpListeningSocket::listenTo(...) -> errore during bind()");
+			throw SocketError("TcpListeningSocket::listenTo(...) -> error during bind()");
 		}
 
 	} else {
@@ -77,7 +77,7 @@ bool TcpListeningSocket::listenTo(const uint16_t port, const uint16_t backlog){
 		myAddr.sin6_addr = in6addr_any;
 		myAddr.sin6_port = htons(port);
 		if(bind(sockfd, (struct sockaddr*) &myAddr, sizeof(myAddr)) < 0) {
-			throw SocketError("TcpListeningSocket::listenTo(...) -> errore during bind()");
+			throw SocketError("TcpListeningSocket::listenTo(...) -> error during bind()");
 		}
 
 	}
