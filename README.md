@@ -9,30 +9,40 @@ The purpose of this library is to offer an interface for TCP and UDP connections
  
 However, the library is still under development, for example, support for UDP connections has not yet been implemented.
 
-## Compile
-A small sample source (*testMain.cpp*) implementing the *main* function is provided with the library code.
-This source can be used as an example to understand how the library can be used and compiled with the make command (a *makefile* is already present) or via CMake (functionality in development state).
-If you are using Microsoft Windows and if you want to manually compile the library do not forget to use the "WINDOWS" flag and to link also *ws2_32.lib* and *wsock32.lib*.
+## Build on Linux/FreeBSD/Cygwin
+There is a makefile! :D
+Just run *make* or *make start* to build the library. Use *make all* to build everything (example included).
+For a list a compatible systems see "Compatibility and tests".
+Release version coming soon. :)
+
+## Build on Windows
+There are no automatic building systems for now. You can wait for release versions or compile manually.
+For example, using *MSVC2019*, you can run:
+    <pre><code>cd bin
+    set COMPILER_PATH=cl.exe
+    set COMPILER_FLAG=/DWINDOWS /I..\Socketz /EHs
+    %COMPILER_PATH% %COMPILER_FLAG% ..\Socketz\common.cpp ..\Socketz\SocketError.cpp ..\Socketz\TcpListeningSocket.cpp ..\Socketz\TcpSocket.cpp ..\examples\testClient.cpp /FetestClient.exe
+    %COMPILER_PATH% %COMPILER_FLAG% ..\Socketz\common.cpp ..\Socketz\SocketError.cpp ..\Socketz\TcpListeningSocket.cpp ..\Socketz\TcpSocket.cpp ..\examples\testServer.cpp /FetestServer.exe
+    cd ..</code></pre>
+
+## Build on Mac OS X
+WIP
 
 ## Compatibility and tests
 This software is and will be tested only for 64bit systems.
 It "should" also run on 32bit systems, but no tests are performed.
 
-The example was tested under:
+Some tests were run on:
 - **Windows**
-	- Windows 10 (build 2004) using *MSVC2019*
-	Result: compiles but does not run
-	- Windows 10 (build 2004) using *MinGW 7.3.0*
-	Result: compiles but does not run
+	- Windows 10 (build 2004) using *MSVC2019* → it works
+	- Windows 10 (build 2004) using *MinGW 7.3.0* → I almost did it
+	- Cygwin on Windows 10 (build 2004) using *gcc-g++ 10.2.0-1* → it works
 - **GNU/Linux**
-	- Ubuntu 18.04 LTS using *g++ (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0* and *make*
-	Result: works
+	- Ubuntu 18.04 LTS using *g++ (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0* and *make* → it works
 - **FreeBSD**
-	- FreeBSD 12.1 using *g++ (FreeBSD Ports Collection) 9.3.0* and *make*
-	Result: works
+	- FreeBSD 12.1 using *g++ (FreeBSD Ports Collection) 9.3.0* and *make* → it works
 - **Mac OS X**
-	- Mac OS X Catalina
-	Result: not tested yet
+	- WIP
 
 ## License
-See the *LICENSE* file.
+See the *LICENSE* file. Basically everything is licensed under LGPL v2.1.
