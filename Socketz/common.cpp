@@ -2,18 +2,46 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <string>
 #include <climits>
 #include <iostream>
 
 #ifdef WINDOWS
+#include <Ws2tcpip.h>
+#include <ip2string.h>
 #else
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #endif
 
+
 using namespace std;
+
+
+#ifdef WINDOWS
+static bool wsaStarted = false;
+#endif
+
+
+#ifdef WINDOWS
+void SocketzInternals::startWsaIfNeeded() {
+	if(!wsaStarted) {
+		WSADATA wsaData;
+		int errorCode = WSAStartup(MAKEWORD(2,2), &wsaData);
+	    if(errorCode != 0) {
+	        throw SocketError(
+				std::string("SocketzInternals::startWsaIfNeeded() -> WSAStartup(...) failde, result is ") +
+				std::to_string(errorCode) +
+				", WSAGetLastError() is " +
+				std::to_string(WSAGetLastError())
+			);
+	    }
+	}
+}
+#endif
 
 in_addr SocketzInternals::ipv4AddressFromString(const std::string& ipString) {
 	#ifdef WINDOWS
@@ -64,16 +92,7 @@ std::string SocketzInternals::ipv4AddressToString(const in_addr* addr) {
 
     #ifdef WINDOWS
 
-    struct sockaddr_storage ss;
-    unsigned long s = sizeof(buf);
-    ZeroMemory(&ss, sizeof(ss));
-    ss.ss_family = AF_INET;
-    ((struct sockaddr_in *)&ss)->sin_addr = *addr;
-
-    if(WSAAddressToString((struct sockaddr *)&ss, sizeof(ss), NULL, buf, &s) == 0) {
-        //There was an error
-        return string("unknown");
-    }
+	RtlIpv4AddressToString(addr, buf);
 
     #else
 
@@ -92,16 +111,7 @@ std::string SocketzInternals::ipv6AddressToString(const in6_addr* addr) {
 
     #ifdef WINDOWS
 
-    struct sockaddr_storage ss;
-    unsigned long s = sizeof(buf);
-    ZeroMemory(&ss, sizeof(ss));
-    ss.ss_family = AF_INET6;
-    ((struct sockaddr_in6 *)&ss)->sin6_addr = *addr;
-
-    if(WSAAddressToString((struct sockaddr *)&ss, sizeof(ss), NULL, buf, &s) == 0) {
-        //There was an error
-        return "unknown";
-    }
+    RtlIpv6AddressToString(addr, buf);
 
     #else
 

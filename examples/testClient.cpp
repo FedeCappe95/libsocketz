@@ -19,6 +19,10 @@ void testClient() {
 
 int main() {
     cout << "Hello World!" << endl;
-    testClient();
+    try {
+        testClient();
+    } catch (SocketError e) {
+        cerr << e.getMessage() << endl;
+    }
     return 0;
 }

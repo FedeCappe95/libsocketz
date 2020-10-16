@@ -3,8 +3,13 @@
 
 
 #ifdef WINDOWS
+#pragma comment(lib,"ws2_32.lib")   //winsock2
+#pragma comment(lib,"ntdll.lib")    //ip2string.h
+#endif
+
+
+#ifdef WINDOWS
 #include <Ws2tcpip.h>
-#include <Windows.h>
 #else
 #include <netinet/in.h>
 #endif
@@ -25,6 +30,9 @@ enum InternetProtocol {IPv4, IPv6};
 // Help-functions usefull in some classes
 namespace SocketzInternals {
 
+    #ifdef WINDOWS
+    void startWsaIfNeeded();
+    #endif
     in_addr ipv4AddressFromString(const std::string& ipString);
     in6_addr ipv6AddressFromString(const std::string& ipString);
     std::string ipv4AddressToString(const in_addr* addr);

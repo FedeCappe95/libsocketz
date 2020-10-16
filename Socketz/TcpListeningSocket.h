@@ -4,13 +4,13 @@
 
 #ifdef WINDOWS
 #include <Ws2tcpip.h>
-#include <Windows.h>
 #else
 #include <netinet/in.h>
 #endif
 
 #include "TcpSocket.h"
 #include "common.h"
+
 
 class TcpListeningSocket {
 private:

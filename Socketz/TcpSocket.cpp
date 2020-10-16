@@ -15,10 +15,6 @@
 #include <sys/socket.h>
 #endif
 
-#ifdef WINDOWS
-#else
-#define closesocket ::close
-#endif
 
 using namespace std;
 using namespace SocketzInternals;
@@ -28,6 +24,9 @@ TcpSocket::TcpSocket(const InternetProtocol internetProtocol) :
 	sockfd(0),
 	connectionStatus(-2)
 {
+	#ifdef WINDOWS
+	SocketzInternals::startWsaIfNeeded();
+	#endif
 	sin_family = (internetProtocol == IPv4 ? AF_INET : AF_INET6);
 	sockfd = socket(sin_family, SOCK_STREAM, 0);
 	if(sockfd < 0) {
@@ -35,16 +34,15 @@ TcpSocket::TcpSocket(const InternetProtocol internetProtocol) :
     }
 }
 
-TcpSocket::~TcpSocket() {
-	if(sockfd > 0) {
-		closesocket(sockfd);
-	}
-}
+//Do not close the socket in the destructor!! If you close it here you will
+//spend the entire day looking for bugs... Just like I did...
+//When you copy a TcpSocket/TcpListeningSocket, the old one will have an invalid
+//socketfd as a private data member!
+TcpSocket::~TcpSocket() {}
 
 bool TcpSocket::connectTo(const std::string& ip, const uint16_t port) {
-	if(isConnected()){
+	if(isConnected())
 		throw SocketError("Already connected socket");
-	}
 
 	connectionStatus = -1;
 
@@ -69,15 +67,17 @@ bool TcpSocket::connectTo(const std::string& ip, const uint16_t port) {
 	return isConnected();
 }
 
-int TcpSocket::send(const void* buffer, const uint32_t size) {
-	if(size > INT_MAX){
-		throw SocketError("TcpSocket::send(...) -> size too big");
-	}
-	if(!isConnected()){
-		throw SocketError("It is impossible to send something using a non connected socket");
-	}
+void TcpSocket::sendOrDie(const void* buffer, const uint32_t size) {
+	if(send(buffer,size) != (int)size)
+		throw SocketError("Error sending socket data");
+}
 
-	//old version: int actuallySend = write(sockfd, buffer, size);
+int TcpSocket::send(const void* buffer, const uint32_t size) {
+	if(size > INT_MAX)
+		throw SocketError("TcpSocket::send(...) -> size too big");
+	if(!isConnected())
+		throw SocketError("It is impossible to send something using a non connected socket");
+
 	#ifdef WINDOWS
 	int actuallySent = ::send(sockfd, (const char*)buffer, size, 0);
 	#else
@@ -91,63 +91,54 @@ int TcpSocket::send(const std::vector<byte>& buffer) {
 	return send((const byte*)buffer.data(), buffer.size());
 }
 
-bool TcpSocket::sendObject(const std::vector<byte>& buffer) {
+void TcpSocket::sendObject(const std::vector<byte>& buffer) {
 	uint32_t size = buffer.size();
-	if(send((byte*)&size, sizeof(size)) != sizeof(size))
-		return false;
-	if(send((const byte*)buffer.data(), buffer.size()) != (int)buffer.size())
-		return false;
-	return true;
+	sendOrDie(&size, sizeof(size));
+	sendOrDie(buffer.data(), buffer.size());
 }
 
-bool TcpSocket::sendObject(const byte* buffer, const uint32_t size) {
-	if(send((byte*)&size, sizeof(size)) != sizeof(size))
-		return false;
-	if(send(buffer, size) != (int)size)
-		return false;
-	return true;
+void TcpSocket::sendObject(const void* buffer, const uint32_t size) {
+	sendOrDie(&size, sizeof(size));
+	sendOrDie(buffer, size);
 }
 
-bool TcpSocket::sendString(const std::string& str) {
+void TcpSocket::sendString(const std::string& str) {
 	uint32_t size = str.length();
-	if(send((byte*)&size, sizeof(size)) != sizeof(size))
-		return false;
-	if(send(str.c_str(), size) != (int)size)
-		return false;
-	return true;
+	sendOrDie(&size, sizeof(size));
+	sendOrDie(str.c_str(), size);
+}
+
+void TcpSocket::receiveOrDie(void* buffer, const uint32_t howManyBytes) {
+	if(receive(buffer, howManyBytes) != (int)howManyBytes)
+		throw SocketError("Error receving socket data");
 }
 
 int TcpSocket::receive(void* buffer, const uint32_t howManyBytes) {
-	if(howManyBytes > INT_MAX){
+	if(howManyBytes > INT_MAX)
 		throw SocketError("TcpSocket::receive(...) -> howManyBytes too big");
-	}
-	if(!isConnected()){
+	if(!isConnected())
 		throw SocketError("It is impossible to send something using a non connected socket");
-	}
 
 	#ifdef WINDOWS
-	int actuallyReceived = recv(sockfd, (char*)buffer, howManyBytes, MWMO_WAITALL);
+	int actuallyReceived = recv(sockfd, (char*)buffer, howManyBytes, 0);
 	#else
-	int actuallyReceived = recv(sockfd, buffer, howManyBytes, MSG_WAITALL);
+	//int actuallyReceived = recv(sockfd, buffer, howManyBytes, MSG_WAITALL);
+	int actuallyReceived = recv(sockfd, buffer, howManyBytes, 0);
 	#endif
 
 	return actuallyReceived;
 }
 
 std::vector<byte> TcpSocket::receive(const uint32_t howManyBytes) {
-	if(howManyBytes > INT_MAX){
+	if(howManyBytes > INT_MAX)
 		throw SocketError("TcpSocket::receive(...) -> howManyBytes too big");
-	}
-	if(!isConnected()){
+	if(!isConnected())
 		throw SocketError("Impossible to send something using a non connected socket");
-	}
 
 	std::vector<byte> receiveVector(howManyBytes);
 	int actuallyReceived = receive(receiveVector.data(), howManyBytes);
-	if(actuallyReceived < 0){
-		cerr << "Error: TcpSocket::receive(...) can not receive correctly";
+	if(actuallyReceived < 0)
 		return vector<byte>();
-	}
 	if((uint32_t)actuallyReceived != howManyBytes)
 		receiveVector.resize(actuallyReceived);
 
@@ -156,35 +147,35 @@ std::vector<byte> TcpSocket::receive(const uint32_t howManyBytes) {
 
 std::vector<byte> TcpSocket::receiveObject() {
 	uint32_t size;
-	if(receive((byte*)&size, sizeof(size)) != sizeof(size))
-		return std::vector<byte>(0);
+	receiveOrDie((byte*)&size, sizeof(size));
 	std::vector<byte> buffer(size);
-	if(receive(buffer.data(), size) != (int)size)
-		return std::vector<byte>(0);
+	receiveOrDie(buffer.data(), size);
 	return buffer;
 }
 
 std::string TcpSocket::receiveString() {
 	uint32_t size;
-	if(receive((byte*)&size, sizeof(size)) != sizeof(size))
-		return "";
+	receiveOrDie((byte*)&size, sizeof(size));
 	std::vector<byte> buffer(size+1);
-	if(receive(buffer.data(), size) != (int)size)
-		return "";
+	receiveOrDie(buffer.data(), size);
 	buffer[size] = 0;
 	return string((char*)buffer.data());
 }
 
 void TcpSocket::close() {
-	if(sockfd > 0){
+	if(sockfd > 0) {
+		#ifdef WINDOWS
 		closesocket(sockfd);
+		#else
+		::close(sockfd);
+		#endif
 		sockfd = 0;
 	}
 	connectionStatus = -2;
 }
 
-TcpSocket TcpSocket::fromSockfd(int sockfd, const short sin_family) {
-	if(sockfd < 0){
+TcpSocket TcpSocket::fromSockfd(SocketDescriptor sockfd, const short sin_family) {
+	if(sockfd < 0) {
 		throw SocketError("TcpSocket::fromSockfd(...) -> ivalid sockfd");
 	}
 
@@ -192,6 +183,7 @@ TcpSocket TcpSocket::fromSockfd(int sockfd, const short sin_family) {
 	newTcpSocket.sockfd = sockfd;
 	newTcpSocket.connectionStatus = 0;
 	newTcpSocket.sin_family = sin_family;
+
 	return newTcpSocket;
 }
 
@@ -234,6 +226,6 @@ int TcpSocket::getSockOptions() {
 	return errorCode;
 }
 
-int TcpSocket::getSockfd() {
+SocketDescriptor TcpSocket::getSockfd() {
 	return sockfd;
 }

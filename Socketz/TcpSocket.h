@@ -3,7 +3,6 @@
 
 #ifdef WINDOWS
 #include <Ws2tcpip.h>
-#include <Windows.h>
 #else
 #include <netinet/in.h>
 #endif
@@ -19,6 +18,10 @@ private:
 	short sin_family; //IPv4 (AF_INET) or IPv6 (AF_INET6)
 	SocketDescriptor sockfd;
 
+private:
+	inline void sendOrDie(const void* buffer, const uint32_t size);
+	inline void receiveOrDie(void* buffer, const uint32_t howManyBytes);
+
 public:
 	TcpSocket(const InternetProtocol internetProtocol = IPv4);
 	~TcpSocket();
@@ -31,9 +34,9 @@ public:
 	int send(const void* buffer, const uint32_t size);
 	int send(const std::vector<byte>& buffer);
 
-	bool sendObject(const std::vector<byte>& buffer);
-	bool sendObject(const byte* buffer, const uint32_t size);
-	bool sendString(const std::string& str);
+	void sendObject(const std::vector<byte>& buffer);
+	void sendObject(const void* buffer, const uint32_t size);
+	void sendString(const std::string& str);
 
 	int receive(void* buffer, const uint32_t howManyBytes);
 	std::vector<byte> receive(const uint32_t howManyBytes);
@@ -55,13 +58,13 @@ public:
 	 * Return the old-style socket descriptor.
 	 * This function is only for debugging purpose and should not be used.
 	*/
-	int getSockfd();
+	SocketDescriptor getSockfd();
 
 public:
 	/**
 	 * Utility function: convert a socket descriptor to a TcpSocket instance
 	*/
-	static TcpSocket fromSockfd(int sockfd, const short sin_family);
+	static TcpSocket fromSockfd(SocketDescriptor sockfd, const short sin_family);
 
 };
 
