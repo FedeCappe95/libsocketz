@@ -1,29 +1,28 @@
 # libsocketz
 **Multi platform internet socket library**
 
-The purpose of this library is to offer an interface for TCP and UDP connections 
+The purpose of this library is to offer an interface for TCP and UDP connections
 
  - as simple as possible,
  - fully accessible via C ++ constructs and
  - compatible with all major operating systems without the need for modifications.
- 
-However, the library is still under development, for example, support for UDP connections has not yet been implemented.
+
+However, the library is still under development (alfa stage), for example, support for UDP connections has not yet been implemented.
 
 ## Build on Linux/FreeBSD/Cygwin
 There is a makefile! :D
 Just run *make* or *make start* to build the library. Use *make all* to build everything (example included).
-For a list a compatible systems see "Compatibility and tests".
+For a list of tested compilers and systems, see the appropriate paragraph (*Compatibility and tests*).
 Release version coming soon. :)
 
 ## Build on Windows
-There are no automatic building systems for now. You can wait for release versions or compile manually.
-For example, using *MSVC2019*, you can run:
-    <pre><code>cd bin
-    set COMPILER_PATH=cl.exe
-    set COMPILER_FLAG=/DWINDOWS /I..\Socketz /EHs
-    %COMPILER_PATH% %COMPILER_FLAG% ..\Socketz\common.cpp ..\Socketz\SocketError.cpp ..\Socketz\TcpListeningSocket.cpp ..\Socketz\TcpSocket.cpp ..\examples\testClient.cpp /FetestClient.exe
-    %COMPILER_PATH% %COMPILER_FLAG% ..\Socketz\common.cpp ..\Socketz\SocketError.cpp ..\Socketz\TcpListeningSocket.cpp ..\Socketz\TcpSocket.cpp ..\examples\testServer.cpp /FetestServer.exe
-    cd ..</code></pre>
+You have three options:
+- Install **Cygwin** and follow the instructions in the appropriate paragraph.
+- Use **MinGW**. You need to customize the script *build-Windows-MinGW.bat* by adding the path to your MinGW installation. Once this is done, just run the script.
+- Use **MSVC2019**. You need to customize the script by adding paths relative to the MSCV2019 installation. Once this is done, just run the script.
+
+For a list of tested compilers and systems, see the appropriate paragraph (*Compatibility and tests*).
+Release version coming soon. :)
 
 ## Build on Mac OS X
 WIP

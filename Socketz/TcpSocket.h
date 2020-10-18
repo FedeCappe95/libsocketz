@@ -11,7 +11,15 @@
 #include <vector>
 #include "common.h"
 
-class TcpSocket {
+
+#ifdef MSVC
+#define EXPORT_CLASS_TcpSocket __declspec(dllexport) TcpSocket
+#else
+#define EXPORT_CLASS_TcpSocket TcpSocket
+#endif
+
+
+class EXPORT_CLASS_TcpSocket {
 
 private:
 	int connectionStatus; //0 connected, -1 error, -2 not connected

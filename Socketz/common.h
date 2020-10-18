@@ -27,6 +27,7 @@ typedef unsigned char byte;
 
 enum InternetProtocol {IPv4, IPv6};
 
+
 // Help-functions usefull in some classes
 namespace SocketzInternals {
 

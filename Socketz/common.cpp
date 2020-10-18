@@ -8,7 +8,9 @@
 
 #ifdef WINDOWS
 #include <Ws2tcpip.h>
-#include <ip2string.h>
+#ifndef MINGW           //With MSVC2019 we need ip2string.h that is from the Windows SDK Kit
+#include <ip2string.h>  //With MinGW everything is in ws2rcpip.h
+#endif
 #else
 #include <unistd.h>
 #include <arpa/inet.h>

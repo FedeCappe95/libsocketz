@@ -12,7 +12,15 @@
 #include "common.h"
 
 
-class TcpListeningSocket {
+#ifdef MSVC
+#define EXPORT_CLASS_TcpListeningSocket __declspec(dllexport) TcpListeningSocket
+#else
+#define EXPORT_CLASS_TcpListeningSocket TcpListeningSocket
+#endif
+
+
+class EXPORT_CLASS_TcpListeningSocket {
+
 private:
 	SocketDescriptor sockfd;
 	bool listening;
@@ -25,6 +33,7 @@ public:
 	bool listenTo(const uint16_t port, const uint16_t backlog = DEFAULT_BACKLOG);
 	TcpSocket acceptRequest();
 	void close();
+
 };
 
 
