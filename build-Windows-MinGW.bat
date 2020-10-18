@@ -10,7 +10,7 @@ cd bin
 del /Q .\*
 
 echo ===== Building the library =====
-%COMPILER_EXEC% %COMPILER_FLAG% ..\Socketz\common.cpp ..\Socketz\SocketError.cpp ..\Socketz\TcpListeningSocket.cpp ..\Socketz\TcpSocket.cpp -lws2_32 -lntdll -shared -o libsocketz.dll
+%COMPILER_EXEC% %COMPILER_FLAG% ..\Socketz\common.cpp ..\Socketz\SocketException.cpp ..\Socketz\TcpListeningSocket.cpp ..\Socketz\TcpSocket.cpp -lws2_32 -lntdll -shared -o libsocketz.dll
 
 echo ===== Example: testClient =====
 %COMPILER_EXEC% %COMPILER_FLAG% ..\examples\testClient.cpp -lws2_32 -lntdll -lsocketz -o testClient.exe

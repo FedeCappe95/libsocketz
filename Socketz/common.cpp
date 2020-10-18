@@ -34,7 +34,7 @@ void SocketzInternals::startWsaIfNeeded() {
 		WSADATA wsaData;
 		int errorCode = WSAStartup(MAKEWORD(2,2), &wsaData);
 	    if(errorCode != 0) {
-	        throw SocketError(
+	        throw SocketException(
 				std::string("SocketzInternals::startWsaIfNeeded() -> WSAStartup(...) failde, result is ") +
 				std::to_string(errorCode) +
 				", WSAGetLastError() is " +
@@ -52,7 +52,7 @@ in_addr SocketzInternals::ipv4AddressFromString(const std::string& ipString) {
 	struct sockaddr_storage ss;
 	int ssSize = sizeof(ss);
 	if(WSAStringToAddress((LPSTR)ipString.c_str(), AF_INET, NULL, (struct sockaddr *)&ss, &ssSize) != 0) {
-		throw SocketError("Hostname not found or error during parsing hostname");
+		throw SocketException("Hostname not found or error during parsing hostname");
 	}
 	return ((struct sockaddr_in *)&ss)->sin_addr;
 
@@ -60,7 +60,7 @@ in_addr SocketzInternals::ipv4AddressFromString(const std::string& ipString) {
 
 	in_addr address;
 	if(inet_pton(AF_INET, ipString.c_str(), &address) <= 0){
-        throw SocketError("Hostname not found or error during parsing hostname");
+        throw SocketException("Hostname not found or error during parsing hostname");
     }
 	return address;
 
@@ -74,7 +74,7 @@ in6_addr SocketzInternals::ipv6AddressFromString(const std::string& ipString) {
 	struct sockaddr_storage ss;
 	int ssSize = sizeof(ss);
 	if(WSAStringToAddress((LPSTR)ipString.c_str(), AF_INET6, NULL, (struct sockaddr *)&ss, &ssSize) != 0) {
-		throw SocketError("Hostname not found or error during parsing hostname");
+		throw SocketException("Hostname not found or error during parsing hostname");
 	}
 	return ((struct sockaddr_in6 *)&ss)->sin6_addr;
 
@@ -82,7 +82,7 @@ in6_addr SocketzInternals::ipv6AddressFromString(const std::string& ipString) {
 
 	in6_addr address;
 	if(inet_pton(AF_INET6, ipString.c_str(), &address) <= 0){
-        throw SocketError("Hostname not found or error during parsing hostname");
+        throw SocketException("Hostname not found or error during parsing hostname");
     }
 	return address;
 

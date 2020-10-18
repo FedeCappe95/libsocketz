@@ -5,7 +5,7 @@
 #include <climits>
 #include <string>
 #include <iostream>
-#include "SocketError.h"
+#include "SocketException.h"
 #include "common.h"
 
 #ifdef WINDOWS
@@ -33,7 +33,7 @@ TcpListeningSocket::~TcpListeningSocket() {}
 
 bool TcpListeningSocket::listenTo(const uint16_t port, const uint16_t backlog){
 	if(listening)
-		throw SocketError("TcpListeningSocket::listenTo(...) -> socket already in listen state");
+		throw SocketException("TcpListeningSocket::listenTo(...) -> socket already in listen state");
 
 	int errorCode;
 
@@ -52,14 +52,14 @@ bool TcpListeningSocket::listenTo(const uint16_t port, const uint16_t backlog){
 	std::string portString = std::to_string(port);
     errorCode = getaddrinfo(NULL, portString.c_str(), &hints, &result);
     if(errorCode != 0) {
-		throw SocketError("TcpListeningSocket::listenTo(...) -> getaddrinfo failed, errorCode is " + errorCode);
+		throw SocketException("TcpListeningSocket::listenTo(...) -> getaddrinfo failed, errorCode is " + errorCode);
     }
 
 	sockfd = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
     if(sockfd == INVALID_SOCKET) {
         freeaddrinfo(result);
         WSACleanup();
-        throw SocketError("TcpListeningSocket::listenTo(...) -> socket(...) failed, sockfd is " + sockfd);
+        throw SocketException("TcpListeningSocket::listenTo(...) -> socket(...) failed, sockfd is " + sockfd);
     }
 
 	errorCode = bind(sockfd, result->ai_addr, (int)result->ai_addrlen);
@@ -67,7 +67,7 @@ bool TcpListeningSocket::listenTo(const uint16_t port, const uint16_t backlog){
         freeaddrinfo(result);
         closesocket(sockfd);
         WSACleanup();
-        throw SocketError("TcpListeningSocket::listenTo(...) -> bind(...) failed, errorCode is " + errorCode);
+        throw SocketException("TcpListeningSocket::listenTo(...) -> bind(...) failed, errorCode is " + errorCode);
     }
 
     freeaddrinfo(result);
@@ -76,7 +76,7 @@ bool TcpListeningSocket::listenTo(const uint16_t port, const uint16_t backlog){
     if(errorCode == SOCKET_ERROR) {
         closesocket(sockfd);
         WSACleanup();
-        throw SocketError(
+        throw SocketException(
 			std::string("TcpListeningSocket::listenTo(...) -> listen(...) failed, errorCode is ") +
 			std::to_string(errorCode) +
 			"WSAGetLastError() is " +
@@ -87,18 +87,18 @@ bool TcpListeningSocket::listenTo(const uint16_t port, const uint16_t backlog){
 	//After some tests, it seems I don't need this settings on Windows...
 	//const BOOL yes = 1;
 	//if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&yes, sizeof(int)) < 0)
-		//throw SocketError("setsockopt(SO_REUSEADDR) failed");
+		//throw SocketException("setsockopt(SO_REUSEADDR) failed");
 
 	#else
 
 	sockfd = socket(sin_family, SOCK_STREAM, 0);
 	if(sockfd < 0) {
-		throw SocketError("TcpListeningSocket::listenTo(...) -> error creating the socker sockfd is " + sockfd);
+		throw SocketException("TcpListeningSocket::listenTo(...) -> error creating the socker sockfd is " + sockfd);
     }
 	int yes = 1;
 	if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) < 0) {
 		::close(sockfd);
-		throw SocketError("setsockopt(SO_REUSEADDR) failed");
+		throw SocketException("setsockopt(SO_REUSEADDR) failed");
 	}
 
 	//The bind procedure is different if IPv4 or IPv6 is used
@@ -113,7 +113,7 @@ bool TcpListeningSocket::listenTo(const uint16_t port, const uint16_t backlog){
 		errorCode = bind(sockfd, (struct sockaddr*) &myAddr, sizeof(myAddr));
 		if(errorCode < 0) {
 			::close(sockfd);
-			throw SocketError(
+			throw SocketException(
 				std::string("TcpListeningSocket::listenTo(...) -> error bind(...) failde, errorCode is ") +
 				std::to_string(errorCode) +
 				std::string(", sockfd is ") +
@@ -132,7 +132,7 @@ bool TcpListeningSocket::listenTo(const uint16_t port, const uint16_t backlog){
 		errorCode = bind(sockfd, (struct sockaddr*) &myAddr, sizeof(myAddr));
 		if(errorCode < 0) {
 			::close(sockfd);
-			throw SocketError(
+			throw SocketException(
 				std::string("TcpListeningSocket::listenTo(...) -> error bind(...) failed, errorCode is ") +
 				std::to_string(errorCode) +
 				std::string(", sockfd is ") +
@@ -145,7 +145,7 @@ bool TcpListeningSocket::listenTo(const uint16_t port, const uint16_t backlog){
 	errorCode = listen(sockfd,backlog);
 	if(errorCode < 0) {
         ::close(sockfd);
-        throw SocketError("TcpListeningSocket::listenTo(...) -> listen(...) failed, errorCode is " + errorCode);
+        throw SocketException("TcpListeningSocket::listenTo(...) -> listen(...) failed, errorCode is " + errorCode);
     }
 
 	#endif
@@ -178,7 +178,7 @@ TcpSocket TcpListeningSocket::acceptRequest() {
 	#else
 	if(newsockfd < 0)
 	#endif
-		throw SocketError("TcpListeningSocket::acceptRequest() failed");
+		throw SocketException("TcpListeningSocket::acceptRequest() failed");
 
 	TcpSocket newTcpSocket = TcpSocket::fromSockfd(newsockfd, sin_family);
 

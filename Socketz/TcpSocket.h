@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include "common.h"
+#include <climits>
 
 
 #ifdef MSVC
@@ -19,12 +20,21 @@
 #endif
 
 
+#define DEFAULT_SOCKET_MAX_OBJECT_SIZE (uint32_t)INT_MAX
+#define ABSOLUTE_MAX_SOCKET_MAX_OBJECT_SIZE (uint32_t)INT_MAX
+#define ABSOLUTE_MIN_SOCKET_MAX_OBJECT_SIZE 1U
+
+
+enum SocketStatus {CONNECTED, CLOSED, S_ERROR};
+
+
 class EXPORT_CLASS_TcpSocket {
 
 private:
-	int connectionStatus; //0 connected, -1 error, -2 not connected
+	SocketStatus socketStatus;
 	short sin_family; //IPv4 (AF_INET) or IPv6 (AF_INET6)
 	SocketDescriptor sockfd;
+	uint32_t maxObjectSize;
 
 private:
 	inline void sendOrDie(const void* buffer, const uint32_t size);
@@ -53,20 +63,26 @@ public:
 	std::string receiveString();
 
 	void close();
-	inline bool isConnected();
+	inline bool isConnected() const;
+	inline SocketStatus getSocketStatus() const;
 
 	std::string getPeerName() const;
+
+	uint32_t getMaxObjectSize() const;
+	bool setMaxObjectSize(const uint32_t maxObjectSize);
 
 	/**
 	 * Old-style socket option
 	*/
-	int getSockOptions();
+	int getSockOptions() const;
 
 	/**
 	 * Return the old-style socket descriptor.
 	 * This function is only for debugging purpose and should not be used.
 	*/
-	SocketDescriptor getSockfd();
+	SocketDescriptor getSockfd() const;
+	int getLastSocketErrorCode() const;
+	std::string getLastSockerErrorString() const;
 
 public:
 	/**

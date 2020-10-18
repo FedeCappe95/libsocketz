@@ -18,17 +18,17 @@ start:
 all: ./bin/libsocketz.so ./bin/testClient ./bin/testServer
 
 #Test client
-./bin/testClient: ./bin/TcpSocket.o ./bin/TcpListeningSocket.o ./bin/SocketError.o ./bin/common.o ./examples/testClient.cpp $(COMMONDEP)
+./bin/testClient: ./bin/TcpSocket.o ./bin/TcpListeningSocket.o ./bin/SocketException.o ./bin/common.o ./examples/testClient.cpp $(COMMONDEP)
 	@echo "\n=== Client executable ==="
 	@echo "  >> $@"
-	@g++ ./examples/testClient.cpp ./bin/TcpSocket.o ./bin/TcpListeningSocket.o ./bin/SocketError.o ./bin/common.o	$(OPT) $(INC) -o $@
+	@g++ ./examples/testClient.cpp ./bin/TcpSocket.o ./bin/TcpListeningSocket.o ./bin/SocketException.o ./bin/common.o	$(OPT) $(INC) -o $@
 	@echo ""
 
 #Test server
-./bin/testServer: ./bin/TcpSocket.o ./bin/TcpListeningSocket.o ./bin/SocketError.o ./bin/common.o ./examples/testServer.cpp $(COMMONDEP)
+./bin/testServer: ./bin/TcpSocket.o ./bin/TcpListeningSocket.o ./bin/SocketException.o ./bin/common.o ./examples/testServer.cpp $(COMMONDEP)
 	@echo "\n=== Server executable ==="
 	@echo "  >> $@"
-	@g++ ./examples/testServer.cpp ./bin/TcpSocket.o ./bin/TcpListeningSocket.o ./bin/SocketError.o ./bin/common.o	$(OPT) $(INC) -o $@
+	@g++ ./examples/testServer.cpp ./bin/TcpSocket.o ./bin/TcpListeningSocket.o ./bin/SocketException.o ./bin/common.o	$(OPT) $(INC) -o $@
 	@echo ""
 
 #Object files of libsocketz
@@ -40,17 +40,17 @@ all: ./bin/libsocketz.so ./bin/testClient ./bin/testServer
 	@echo "  >> $@"
 	@g++ -fPIC -c ./Socketz/TcpListeningSocket.cpp $(OPT) $(INC) -o $@
 
-./bin/SocketError.o: ./Socketz/SocketError.cpp ./Socketz/SocketError.h $(COMMONDEP)
+./bin/SocketException.o: ./Socketz/SocketException.cpp ./Socketz/SocketException.h $(COMMONDEP)
 	@echo "  >> $@"
-	@g++ -fPIC -c ./Socketz/SocketError.cpp $(OPT) $(INC)        -o $@
+	@g++ -fPIC -c ./Socketz/SocketException.cpp $(OPT) $(INC)        -o $@
 
 ./bin/common.o: ./Socketz/common.cpp $(COMMONDEP)
 	@echo "  >> $@"
 	@g++ -fPIC -c ./Socketz/common.cpp $(OPT) $(INC)             -o $@
 
-./bin/libsocketz.so: ./bin/TcpSocket.o ./bin/TcpListeningSocket.o ./bin/SocketError.o ./bin/common.o
+./bin/libsocketz.so: ./bin/TcpSocket.o ./bin/TcpListeningSocket.o ./bin/SocketException.o ./bin/common.o
 	@echo "  >> $@"
-	@g++ ./bin/TcpSocket.o ./bin/TcpListeningSocket.o ./bin/SocketError.o ./bin/common.o -shared -o ./bin/libsocketz.so
+	@g++ ./bin/TcpSocket.o ./bin/TcpListeningSocket.o ./bin/SocketException.o ./bin/common.o -shared -o ./bin/libsocketz.so
 
 #Clean
 clean:

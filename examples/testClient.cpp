@@ -21,7 +21,7 @@ int main() {
     cout << "Hello World!" << endl;
     try {
         testClient();
-    } catch (SocketError e) {
+    } catch (const SocketException& e) {
         cerr << e.getMessage() << endl;
     }
     return 0;

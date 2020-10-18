@@ -1,5 +1,5 @@
 # libsocketz
-**Multi platform internet socket library**
+**Multi platform network socket library**
 
 The purpose of this library is to offer an interface for TCP and UDP connections
 
@@ -7,9 +7,9 @@ The purpose of this library is to offer an interface for TCP and UDP connections
  - fully accessible via C ++ constructs and
  - compatible with all major operating systems without the need for modifications.
 
-However, the library is still under development (alfa stage), for example, support for UDP connections has not yet been implemented.
+However, the library is still under development (alpha stage), for example, support for UDP connections has not yet been implemented.
 
-## Build on Linux/FreeBSD/Cygwin
+## Build on Linux / FreeBSD / Cygwin / Mac OS X
 There is a makefile! :D
 Just run *make* or *make start* to build the library. Use *make all* to build everything (example included).
 For a list of tested compilers and systems, see the appropriate paragraph (*Compatibility and tests*).
@@ -24,24 +24,21 @@ You have three options:
 For a list of tested compilers and systems, see the appropriate paragraph (*Compatibility and tests*).
 Release version coming soon. :)
 
-## Build on Mac OS X
-WIP
-
 ## Compatibility and tests
-This software is and will be tested only for 64bit systems.
+This software is and will be tested only on 64bit systems.
 It "should" also run on 32bit systems, but no tests are performed.
 
-Some tests were run on:
+Some tests were (successfully) run on:
 - **Windows**
-	- Windows 10 (build 2004) using *MSVC2019* → it works
-	- Windows 10 (build 2004) using *MinGW 7.3.0* → I almost did it
-	- Cygwin on Windows 10 (build 2004) using *gcc-g++ 10.2.0-1* → it works
+	- Windows 10 (build 2004) using *MSVC2019*
+	- Windows 10 (build 2004) using *MinGW 7.3.0*
+	- Cygwin on Windows 10 (build 2004) using *gcc-g++ 10.2.0-1*
 - **GNU/Linux**
-	- Ubuntu 18.04 LTS using *g++ (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0* and *make* → it works
+	- Ubuntu 18.04 LTS using *g++ (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0*
 - **FreeBSD**
-	- FreeBSD 12.1 using *g++ (FreeBSD Ports Collection) 9.3.0* and *make* → it works
+	- FreeBSD 12.1 using *g++ (FreeBSD Ports Collection) 9.3.0*
 - **Mac OS X**
-	- WIP
+    - Mac OS X Catalina 10.15 using *Xcode 11.3.1*
 
 ## License
 See the *LICENSE* file. Basically everything is licensed under LGPL v2.1.

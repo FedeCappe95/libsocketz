@@ -15,7 +15,7 @@
 #endif
 
 #include <string>
-#include "SocketError.h"
+#include "SocketException.h"
 
 #ifdef WINDOWS
 typedef SOCKET SocketDescriptor;

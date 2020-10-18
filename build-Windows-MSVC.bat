@@ -13,7 +13,7 @@ del /Q .\*
 call %VCVARS_PATH%\vcvars64.bat
 
 echo ===== Building the library =====
-%COMPILER_EXEC% %COMPILER_FLAG% /c ..\Socketz\common.cpp ..\Socketz\SocketError.cpp ..\Socketz\TcpListeningSocket.cpp ..\Socketz\TcpSocket.cpp /Fo
+%COMPILER_EXEC% %COMPILER_FLAG% /c ..\Socketz\common.cpp ..\Socketz\SocketException.cpp ..\Socketz\TcpListeningSocket.cpp ..\Socketz\TcpSocket.cpp /Fo
 %COMPILER_PATH%\link.exe /DLL /OUT:libsocketz.dll .\*.obj
 del *.obj
 
