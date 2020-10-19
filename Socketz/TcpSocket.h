@@ -25,6 +25,9 @@
 #define ABSOLUTE_MIN_SOCKET_MAX_OBJECT_SIZE 1U
 
 
+//#define getSockOptions(L, O, V) getSockOptions(L, O, V, sizeof(*(V)))
+
+
 enum SocketStatus {CONNECTED, CLOSED, S_ERROR};
 
 
@@ -72,23 +75,32 @@ public:
 	bool setMaxObjectSize(const uint32_t maxObjectSize);
 
 	/**
-	 * Old-style socket option
+	 * Old-style socket options
 	*/
-	int getSockOptions() const;
+	inline bool getSockOptions(const int level, const int optname, void* outValue, const uint32_t outValueSize) const;
+	inline bool getSockOptions(const int level, const int optname, bool* outValue) const;
+	inline bool getSockOptions(const int level, const int optname, char* outValue) const;
+	inline bool getSockOptions(const int level, const int optname, short* outValue) const;
+	inline bool getSockOptions(const int level, const int optname, int* outValue) const;
+	inline bool setSockOptions(const int level, const int optname, const void* inValue, const uint32_t inValueSize);
+	inline bool setSockOptions(const int level, const int optname, const bool inValue);
+	inline bool setSockOptions(const int level, const int optname, const char inValue);
+	inline bool setSockOptions(const int level, const int optname, const short inValue);
+	inline bool setSockOptions(const int level, const int optname, const int inValue);
 
 	/**
 	 * Return the old-style socket descriptor.
 	 * This function is only for debugging purpose and should not be used.
 	*/
 	SocketDescriptor getSockfd() const;
-	int getLastSocketErrorCode() const;
-	std::string getLastSockerErrorString() const;
 
 public:
 	/**
 	 * Utility function: convert a socket descriptor to a TcpSocket instance
 	*/
 	static TcpSocket fromSockfd(SocketDescriptor sockfd, const short sin_family);
+	static int getLastSocketErrorCode();
+	static std::string getLastSockerErrorString();
 
 };
 

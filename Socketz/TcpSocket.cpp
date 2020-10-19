@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <climits>
 #include <iostream>
 #include "SocketException.h"
 #include "common.h"
@@ -14,6 +13,10 @@
 #include <netdb.h>
 #include <sys/socket.h>
 #include <errno.h>
+#endif
+
+#ifdef MSVC
+#include <codecvt>
 #endif
 
 
@@ -32,7 +35,7 @@ TcpSocket::TcpSocket(const InternetProtocol internetProtocol) :
 	sin_family = (internetProtocol == IPv4 ? AF_INET : AF_INET6);
 	sockfd = socket(sin_family, SOCK_STREAM, 0);
 	if(sockfd < 0) {
-		throw SocketException("Error during TcpSocket constructor. sockfd=" + sockfd);
+		throw SocketException("Error during TcpSocket constructor");
     }
 }
 
@@ -281,23 +284,79 @@ bool TcpSocket::setMaxObjectSize(const uint32_t maxObjectSize) {
 	return true;
 }
 
-int TcpSocket::getSockOptions() const {
-	int sockopt;
+bool TcpSocket::getSockOptions(const int level, const int optname, void* outValue, const uint32_t outValueSize) const {
 	#ifdef WINDOWS
-	int sockoptSize = sizeof(sockopt);
-	getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (char*)&sockopt, &sockoptSize);
-	#else
-	socklen_t sockoptSize = sizeof(sockopt);
-	getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &sockopt, &sockoptSize);
+	if(outValueSize > INT_MAX)
+		throw SocketException("getSockOptions() -> outValueSize too large. Winsock2 take an integer, max value is INT_MAX");
 	#endif
-	return sockopt;
+
+	int success = getsockopt(
+		sockfd, level, optname,
+		#ifdef WINDOWS
+		(char*)outValue, (int*)&outValueSize
+		#else
+		outValue, (socklen_t*)&outValueSize
+		#endif
+	);
+
+	return (success == 0);
+}
+
+bool TcpSocket::getSockOptions(const int level, const int optname, bool* outValue) const {
+	return getSockOptions(level, optname, outValue, sizeof(*outValue));
+}
+
+bool TcpSocket::getSockOptions(const int level, const int optname, char* outValue) const {
+	return getSockOptions(level, optname, outValue, sizeof(*outValue));
+}
+
+bool TcpSocket::getSockOptions(const int level, const int optname, short* outValue) const {
+	return getSockOptions(level, optname, outValue, sizeof(*outValue));
+}
+
+bool TcpSocket::getSockOptions(const int level, const int optname, int* outValue) const {
+	return getSockOptions(level, optname, outValue, sizeof(*outValue));
+}
+
+bool TcpSocket::setSockOptions(const int level, const int optname, const void* inValue, const uint32_t inValueSize) {
+	#ifdef WINDOWS
+	if(inValueSize > INT_MAX)
+		throw SocketException("getSockOptions() -> inValueSize too large. Winsock2 take an integer, max value is INT_MAX");
+	#endif
+
+	int success = setsockopt(
+		sockfd, level, optname,
+		#ifdef WINDOWS
+		(const char*)inValue, (int)inValueSize
+		#else
+		inValue, (socklen_t)inValueSize
+		#endif
+	);
+
+	return (success == 0);
+}
+
+bool TcpSocket::setSockOptions(const int level, const int optname, const bool inValue) {
+	return setSockOptions(level, optname, &inValue, sizeof(inValue));
+}
+
+bool TcpSocket::setSockOptions(const int level, const int optname, const char inValue) {
+	return setSockOptions(level, optname, &inValue, sizeof(inValue));
+}
+
+bool TcpSocket::setSockOptions(const int level, const int optname, const short inValue) {
+	return setSockOptions(level, optname, &inValue, sizeof(inValue));
+}
+
+bool TcpSocket::setSockOptions(const int level, const int optname, const int inValue) {
+	return setSockOptions(level, optname, &inValue, sizeof(inValue));
 }
 
 SocketDescriptor TcpSocket::getSockfd() const {
 	return sockfd;
 }
 
-int TcpSocket::getLastSocketErrorCode() const {
+int TcpSocket::getLastSocketErrorCode() {
 	#ifdef WINDOWS
 	return WSAGetLastError();
 	#else
@@ -305,8 +364,9 @@ int TcpSocket::getLastSocketErrorCode() const {
 	#endif
 }
 
-std::string TcpSocket::getLastSockerErrorString() const {
+std::string TcpSocket::getLastSockerErrorString() {
 	#ifdef WINDOWS
+
 	wchar_t *s = NULL;
 	DWORD ec = FormatMessageW(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -314,14 +374,24 @@ std::string TcpSocket::getLastSockerErrorString() const {
 	    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 	    (LPWSTR)&s, 0, NULL
 	);
-	if(ec = 0) {
+	if(ec <= 0) {
 		LocalFree(s);
-		return std::string("");
+		return std::string("Unknown Winsock2 error code");
 	}
+	#ifdef MSVC
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> cvt_utf8;
+	std::string strUtf8 = cvt_utf8.to_bytes(s);
+	LocalFree(s);
+	return strUtf8;
+	#else
 	std::wstring ws(s);
 	LocalFree(s);
 	return std::string(ws.begin(), ws.end());
+	#endif
+
 	#else
+
 	return std::string(strerror(errno));
+
 	#endif
 }

@@ -29,16 +29,18 @@ This software is and will be tested only on 64bit systems.
 It "should" also run on 32bit systems, but no tests are performed.
 
 Some tests were (successfully) run on:
-- **Windows**
+- **Windows (AMD64)**
 	- Windows 10 (build 2004) using *MSVC2019*
 	- Windows 10 (build 2004) using *MinGW 7.3.0*
 	- Cygwin on Windows 10 (build 2004) using *gcc-g++ 10.2.0-1*
-- **GNU/Linux**
+- **GNU/Linux (AMD64)**
 	- Ubuntu 18.04 LTS using *g++ (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0*
-- **FreeBSD**
+- **FreeBSD (AMD64)**
 	- FreeBSD 12.1 using *g++ (FreeBSD Ports Collection) 9.3.0*
-- **Mac OS X**
+- **Mac OS X (AMD64)**
     - Mac OS X Catalina 10.15 using *Xcode 11.3.1*
+- **Android 10 (Aarch64)**
+    - Android 10 using *clang version 10.0.1 on Termux*
 
 ## License
 See the *LICENSE* file. Basically everything is licensed under LGPL v2.1.
